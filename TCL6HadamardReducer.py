@@ -43,8 +43,8 @@ def perform_hadamard_reduction(integrals, corrterms, systemterm):
             f"-{current_gs}{lower_bound}{conform_for_time(dt_comp)}))"))
         else:
             systemterm = systemterm.replace(dt,
-            (f"({dt_comp}*({current_gs}{conform_for_time(dt_comp)}{upper_bound}"
-            f"-{current_gs}{conform_for_time(dt_comp)}{lower_bound}))"))
+            (f"({dt_comp}*({current_gs}{conform_for_time(dt_comp)}{lower_bound}"
+            f"-{current_gs}{conform_for_time(dt_comp)}{upper_bound}))"))
 
         integrals = integrals[:-5]
         # print(dt, " ", dt_comp, " ", transpose, " ", current_gs)
@@ -59,9 +59,59 @@ def perform_hadamard_reduction(integrals, corrterms, systemterm):
 
     return (integrals, systemterm)
 
-integral_ex = "(0t1)(014)(413)(012)(045)"
-corrterms_ex = "<02><51><34>"
-systemterm_ex = "-[1,2]4p[3,5]"
+# expect 'integrals' to be of the form (0tx)(abc), only two integrals
+def replace_dummy_variables(integrals, systemterm):
+    # will swap triangle region so that it is a lower triangle
+
+    triangle_symbols=("a", "b")
+
+    # doesnt look like theres any square integrals but ill include it anyways
+    square_symbols=("c", "d")
+
+    current_intsymb = triangle_symbols
+
+    old_indices=(integrals[3],integrals[8])
+
+    if integrals[6]=="0":
+        # square integral region
+        if integrals[7]=="t":
+            current_intsymb=square_symbols
+        # (0tx)(0xy), lower triangle integral
+        elif integrals[7]==old_indices[0]:
+            pass
+        else:
+            print(integrals, " --- ", systemterm)
+            raise Exception("unknown integral region")
+    # (0tx)(xty), upper triangle integral
+    elif integrals[6]==old_indices[0] and integrals[7]=="t":
+        # swap integrals first
+        integrals = integrals[:3] + old_indices[1] + ")(0" + old_indices[1] + old_indices[0] + ")"
+        old_indices=(integrals[3],integrals[8])
+    else:
+        print(integrals, " --- ", systemterm)
+        raise Exception("unknown integral region")
+
+    # replace dummy variables
+    for old_index, new_symbol in zip(old_indices, current_intsymb):
+        integrals = integrals.replace(old_index, new_symbol)
+        systemterm = systemterm.replace(old_index, new_symbol)
+
+    return (integrals, systemterm)
+
+# integral_ex = "(0t1)(014)(413)(012)(045)"
+# corrterms_ex = "<02><51><34>"
+# systemterm_ex = "-[1,2]4p[3,5]"
+#
+# new_integral_ex, reduced_term_ex = perform_hadamard_reduction(integral_ex, corrterms_ex, systemterm_ex)
+#
+# print("reduced int = ", new_integral_ex)
+# print("reduced term = ", reduced_term_ex)
+#
+# new_integral_ex, reduced_term_ex = replace_dummy_variables(new_integral_ex, reduced_term_ex)
+#
+# print("reduced int = ", new_integral_ex)
+# print("reduced term = ", reduced_term_ex)
+
 
 fname = pjoin(dirname(__file__), "TCL_Integrals.xlsx")
 
@@ -87,8 +137,8 @@ for i, corrterm in enumerate(corrterms):
             # check if integral is blank
             if not isinstance(integral, float):
                 # integral[1:] to remove sign
-                new_integral, reduced_term = perform_hadamard_reduction(integral[1:], corrterm, systemterms[i])
-
+                new_integral, reduced_term = replace_dummy_variables(
+                    *perform_hadamard_reduction(integral[1:], corrterm, systemterms[i]))
                 integrals[i,j] = integral[0] + new_integral
                 reducedsystemterms[i,j] = reduced_term
 
