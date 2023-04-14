@@ -9,9 +9,9 @@ sigma_z = [1, 0; 0, -1];
 %matlab doesn't support arbitrary matrix size
 m = 2;
 %Gamma funciton
-syms G(a,b) [m, m] matrix
+syms G(a,b) [m, m] 
 %A operators, a function of time
-syms A(t) [m,m] matrix
+syms A(t) [m,m]
 syms p [m,m] matrix
 syms t_0
 
