@@ -21,3 +21,4 @@ H_0 = (eps/2) .* sigma_z + (del / 2) .* sigma_x;
 A(t) = expm(i.*t.*H_0) * sigma_z * expm((-i).*t .* H_0)
 
 line13 = - comm((A(b)*(G(b,a)'-G(b,t)')), comm(A(a),(A(t_0)*(G(t,b)'-G(t,a)')))*(A(a)*(G(a,t_0)'-G(a,b)')))*p*A(b)- comm((A(b)*(G(b,a)'-G(b,t)')),(A(t_0)*(G(t,b)'-G(t,a)')))*(A(a)*(G(a,t_0)'-G(a,b)'))*p*comm(a,b)'
+line13 = symmatrix2sym(line13)
