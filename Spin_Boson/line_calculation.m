@@ -12,7 +12,7 @@ syms p a b A(t)
 assume(a > 0);
 assume(b > 0);
 %Dummy A(t) for siplicity
-A(t) = [1,1;1,1] * t;
+A(t) = [1,1;1,1];
 %Now on spin boson
 syms eps del real
 H_0 = (eps/2) .* z + (del / 2) .* x;
@@ -101,7 +101,7 @@ for k = 1: length(matches)
             hadout = [hadout, result];
     end
 end
-hadout = implicit_mutiplication({'a', 'b', 't', 'p','x','y','z','I'}, hadout);
+hadout = implicit_mutiplication({'a', 'b', 't', 'p','x','y','z','I', 'eps', 'del'}, hadout);
 %%
 %process commutator
 %     while sum(line == '[') >0
