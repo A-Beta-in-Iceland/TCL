@@ -102,6 +102,9 @@ for k = 1: length(matches)
     end
 end
 hadout = implicit_mutiplication({'a', 'b', 't', 'p','x','y','z','I', 'eps', 'del'}, hadout);
+% Processing Hadamard product would not change the order of multiplication
+hadout = replace(hadout, 'p','1/2 * (I + p_1*x + p_2*y + p_3 * z)' );
+
 %%
 %process commutator
 %     while sum(line == '[') >0
@@ -134,4 +137,6 @@ while sum(mask1) ~= 0
     target = [pre, result, post];
     mask1 = target == 'S';
 end
-comm_output = simplify(str2sym(target))
+out = str2sym(target);
+out = subs(out, [I,x,y,z], {[1,0;0,1], [0,1;1,0], [0, -i; i, 0], [1, 0; -1, 0]});
+out = Matrix_to_Bloch(out);
