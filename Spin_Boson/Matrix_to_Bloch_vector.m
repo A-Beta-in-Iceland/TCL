@@ -1,6 +1,6 @@
 %This is to save the spectral density. This function takes in a 2x2 matrix
 %and return it in terms of Pauli matrices
-function [coff0, coff1, coff2, coff3] = Matrix_to_Bloch(A)
+function [coff0, coff1, coff2, coff3] = Matrix_to_Bloch_vector(A)
     syms I x y z 
     X = A;
     coff0 = 1/2 * trace(X);

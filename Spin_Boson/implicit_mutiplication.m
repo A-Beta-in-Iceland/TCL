@@ -6,6 +6,7 @@ function out = implicit_mutiplication(symbols, line)
     out = replace(line, '][', ']*[');
     out = replace(out, '](', ']*(');
     out = replace(out, ')[', ')*[');
+    out = replace(out, ')(', ')*(');
     out = replace(out, 'ES', 'E*S');
     out = replace(out, 'E(', 'E*(');
     out = replace(out, ')S', ')*S');
