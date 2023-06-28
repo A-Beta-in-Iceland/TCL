@@ -32,7 +32,7 @@ function [out0, out1, out2, out3] = line_calculation(line)
     % row 9 
     % line = '[a,(0*(GTt0-GTta))]([(b*(-GTba)),p(a*(Gba-G0a))b]-[(b*(-GTba)),pb](a*(Gba-G0a)))';
     % line = '[a,(0*(GTt0-GTta))]([(b*(Gab)),b(a*(GTa0-GTab))p]-(a*(GTa0-GTab))[(b*(Gab)),bp])';
-    % line =  '-[a,(0*(GTt0-GTta))][(b*(-GTba)),(a*(GTa0-GTab))]';
+    line =  '-[a,(0*(GTt0-GTta))][(b*(-GTba)),(a*(GTa0-GTab))]';
         %setup for hadmard
     line = replace(line, '*', 'q');
     %setup for commutator
@@ -120,7 +120,7 @@ function [out0, out1, out2, out3] = line_calculation(line)
     %     end
     %create a copy of hadout
     target = hadout;
-    mask1 = target == 'S';
+    mask1 = 1;
     while sum(mask1) ~= 0
         mask1 = target == 'S';
         mask2 = target == '=';
