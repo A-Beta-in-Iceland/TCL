@@ -1,5 +1,5 @@
 function [out0, out1, out2, out3] = line_calculation(line)
-    %define pauli matrices
+  %define pauli matrices
     %need to clear and reset every time you run
     syms I x y z 
     
@@ -7,21 +7,24 @@ function [out0, out1, out2, out3] = line_calculation(line)
     %Assume that all matrix is m by m, at this point we assume large m bc
     %matlab doesn't support arbitrary matrix size
     %Gamma funciton
-    syms g11(a,b) g12(a,b) g21(a,b) g22(a,b) 
     %A operators, a function of time
-    syms a b A(t) p_1 p_2 p_3 p A1(t) A2(t) A3(t)
+    syms a b A(t) p_1 p_2 p_3 p A1(t) A2(t) A3(t) n al(t) n1 n2 n3
     assume(a > 0);
     assume(b > 0);
+    assume(n1^2 + n3^2 == 1);
     % e: epsilon, del: Delta
     syms e del real
     %Dummy A(t) for siplicity
-    n = [del, 0 , e] ./ sqrt(del^2 + e^2);
-    alpha(t) = t * sqrt(del^2 + e^2)/ 2;
+    % n = [del, 0 , e] ./ sqrt(del^2 + e^2);
+    % n = [n1, n2, n3];
+    % al(t) = t * sqrt(del^2 + e^2)/ 2;
     % A(t) = x * A1(t) - y * A2(t) + z * A3(t);
-    A1(t) = (cos(2* alpha(t)) + 2* (n(1) * sin(alpha(t)))^2 );
-    A2(t) = n(3) * sin(2 * alpha(t));
-    A3(t) = 2 * n(1) * n(3) * (sin(alpha(t)))^2;
-    A(t) = A3(t) * z + A2(t) * y + A1(t) * x;
+    A_sin = [-n1^2 * n3, n3, -n1*n3^2];
+    A_cos = [n3^3, 0, n1*n3^2];
+    A_con = [n1^2 * n3, 0, n1^3 - n1 * n3^2];
+    
+    sig(t) = sin(n*t) .* A_sin + cos(n*t) * A_cos + A_con
+    A(t) = sig(t) * [x; y; z];
     %Now on spin boson
     H_0 = (e/2) .* z + (del / 2) .* x;
     
@@ -32,7 +35,7 @@ function [out0, out1, out2, out3] = line_calculation(line)
     % row 9 
     % line = '[a,(0*(GTt0-GTta))]([(b*(-GTba)),p(a*(Gba-G0a))b]-[(b*(-GTba)),pb](a*(Gba-G0a)))';
     % line = '[a,(0*(GTt0-GTta))]([(b*(Gab)),b(a*(GTa0-GTab))p]-(a*(GTa0-GTab))[(b*(Gab)),bp])';
-    % line =  '-[a,(0*(GTt0-GTta))][(b*(-GTba)),(a*(GTa0-GTab))]';
+    % line =  '-[a,(0*(GTt0-GTta))][(b*(-GTba)),(a*(GTa0-GTab))]pb';
         %setup for hadmard
     line = replace(line, '*', 'q');
     %setup for commutator
@@ -59,8 +62,8 @@ function [out0, out1, out2, out3] = line_calculation(line)
         %a little hard code here but since all the hadmard product we have here
         %is A(t)* (GT something something), we can just plug it in later
         content2{i} = values{2};
-        content2{i} = regexprep(content2{i}, 'GT(\w)(\w)', '[g11($1-$2), g12($1-$2); g21($1-$2), g11($1-$2)]\''');
-        content2{i} = regexprep(content2{i}, 'G(\w)(\w)', '[g11($1-$2), g12($1-$2); g21($1-$2), g11($1-$2)]');
+        content2{i} = regexprep(content2{i}, 'GT(\w)(\w)', 'g0($1-$2) * I + g1($1-$2) * x + g2($1-$2) * y');
+        content2{i} = regexprep(content2{i}, 'G(\w)(\w)', 'g0($1-$2) * I + g1($1-$2) * x - g2($1-$2) * y');
     end
     % these value are here just to turn first and second into matrix
     % treating the parts before Hadmard Product
@@ -76,7 +79,7 @@ function [out0, out1, out2, out3] = line_calculation(line)
         first = str2sym(first);
         first = A(first);
         [endIn(k), second] = checkBracket(endIn(k), content2{k});
-        second = Matrix_to_Bloch(str2sym(second));
+        second = str2sym(second);
     
     %     final = subs(second, [t, t_a, t_b], [t_val, t_a_val, t_b_val]);
     %     second = subs(second, [t, a, b], [t_val, t_a_val, t_b_val]);
@@ -151,4 +154,8 @@ function [out0, out1, out2, out3] = line_calculation(line)
     out = replace(out, 'z', '[1, 0; 0, -1]');
     out = str2sym(out);
     [out0, out1, out2, out3] = Matrix_to_Bloch_vector(out);
+    out0 = simplify(out0);
+    out1 = simplify(out1);
+    out2 = simplify(out2);
+    out3 = simplify(out3);
 end
