@@ -3,6 +3,7 @@ tic
 file = readcell('Reduced_Nonzero_Terms.xlsx');
 fn = file;
 output = {};
+sym_output = {};
 output{1,1} = 'I';
 output{1,2} = 'x';
 output{1,3} = 'y';
@@ -17,10 +18,15 @@ for col = [3, 5, 7]
         if ~strcmp(class(line), 'missing')
             try 
                 [out0, out1, out2, out3] = line_calculation(line);
-                output{row+col, 1} = char(out0);
-                output{row+col, 2} = char(out1);
-                output{row+col, 3} = char(out2);
-                output{row+col, 4} = char(out3);
+                output{r, 1} = char(out0);
+                output{r, 2} = char(out1);
+                output{r, 3} = char(out2);
+                output{r, 4} = char(out3);
+
+                sym_output{r, 1} = out0;
+                sym_output{r, 2} = out1;
+                sym_output{r, 3} = out2;
+                sym_output{r, 4} = out3;
                 if out0 == 0 & out1 == 0 & out2 == 0 & out3 == 0
                     fn{row, col} = '0';
                 end
