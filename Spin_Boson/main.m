@@ -23,10 +23,10 @@ for col = [3, 5, 7]
                 output{r, 3} = char(out2);
                 output{r, 4} = char(out3);
 
-                sym_output{r, 1} = out0;
-                sym_output{r, 2} = out1;
-                sym_output{r, 3} = out2;
-                sym_output{r, 4} = out3;
+                % sym_output{r, 1} = out0;
+                % sym_output{r, 2} = out1;
+                % sym_output{r, 3} = out2;
+                % sym_output{r, 4} = out3;
                 if out0 == 0 & out1 == 0 & out2 == 0 & out3 == 0
                     fn{row, col} = '0';
                 end

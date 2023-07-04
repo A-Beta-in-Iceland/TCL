@@ -21,13 +21,15 @@ function [out0, out1, out2, out3] = line_calculation(line)
     % n = [del, 0 , e] ./ sqrt(del^2 + e^2);
     % n = [n1, n2, n3];
     % al(t) = t * sqrt(del^2 + e^2)/ 2;
-    % A(t) = x * A1(t) - y * A2(t) + z * A3(t);
-    A_sin = [-n1^2 * n3, n3, -n1*n3^2];
-    A_cos = [n3^3, 0, n1*n3^2];
-    A_con = [n1^2 * n3, 0, n1^3 - n1 * n3^2];
-    
-    sig(t) = sin(n*t) .* A_sin + cos(n*t) * A_cos + A_con;
-    A(t) = sig(t) * [x; y; z];
+
+    A(t) = x * A1(t) + y * A2(t) + z * A3(t);
+
+    % A_sin = [-n1^2 * n3, n3, -n1*n3^2];
+    % A_cos = [n3^3, 0, n1*n3^2];
+    % A_con = [n1^2 * n3, 0, n1^3 - n1 * n3^2];
+    % 
+    % sig(t) = sin(n*t) .* A_sin + cos(n*t) * A_cos + A_con;
+    % A(t) = sig(t) * [x; y; z];
     %Now on spin boson
     H_0 = (e/2) .* z + (del / 2) .* x;
 
@@ -93,7 +95,8 @@ function [out0, out1, out2, out3] = line_calculation(line)
     %     final = subs(second, [t, t_a, t_b], [t_val, t_a_val, t_b_val]);
     %     second = subs(second, [t, a, b], [t_val, t_a_val, t_b_val]);
     
-        result = char(HadamardProduct(first, second));
+        result = simplify(HadamardProduct(first, second));
+        result = char(result);
         % plug back in, this doens't work
     %     [first_int, final_int] = regexp(line, pattern)
     %     line = [line(1:max(1, first_int(1) -1)) , result , line(min(final_int(1) + 1, strlength(line)) : end)
@@ -152,7 +155,9 @@ function [out0, out1, out2, out3] = line_calculation(line)
         part1 = str2sym(target(startIn(1)+1: com -1));
         part2 = str2sym(target(com+1 : endIn(1)-1));
         %the part after target commutator
-        result = char(comm(part1, part2));
+        result = comm(part1, part2);
+        result = simplify(result);
+        result = char(result);
         post = target(endIn(1) + 1 : end);
         target = [pre, result, post];
         mask1 = target == 'S';
