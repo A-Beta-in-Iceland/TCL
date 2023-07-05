@@ -1,4 +1,4 @@
-tic
+tic 
 
 file = readcell('Reduced_Nonzero_Terms.xlsx');
 fn = file;

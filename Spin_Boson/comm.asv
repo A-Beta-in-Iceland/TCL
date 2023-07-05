@@ -9,8 +9,7 @@ function out = comm(A, B)
     %can't expand the commutation, it will always return 0.
     %We don't need to keep track of I since every element commutes with I
      if sum(size(A) == [1,1]) == 2
-         %can't use sub, the element will be replaced by element and it
-         %acts kind of similar to tensor products
+         %can't use sub, the element will be replaced by element and 
          A = char(A);
          A = replace(A, 'I', '[1,0;0,1]');
          A = replace(A, 'x', '[0,1;1,0]');
