@@ -22,14 +22,14 @@ function [out0, out1, out2, out3] = line_calculation(line)
     % n = [n1, n2, n3];
     % al(t) = t * sqrt(del^2 + e^2)/ 2;
 
-    A(t) = x * A1(t) + y * A2(t) + z * A3(t);
+    % A(t) = x * A1(t) + y * A2(t) + z * A3(t);
 
-    % A_sin = [-n1^2 * n3, n3, -n1*n3^2];
-    % A_cos = [n3^3, 0, n1*n3^2];
-    % A_con = [n1^2 * n3, 0, n1^3 - n1 * n3^2];
-    % 
-    % sig(t) = sin(n*t) .* A_sin + cos(n*t) * A_cos + A_con;
-    % A(t) = sig(t) * [x; y; z];
+    A_sin = [-n1^2 * n3, n3, -n1*n3^2];
+    A_cos = [n3^3, 0, n1*n3^2];
+    A_con = [n1^2 * n3, 0, n1^3 - n1 * n3^2];
+
+    sig(t) = sin(n*t) .* A_sin + cos(n*t) * A_cos + A_con;
+    A(t) = sig(t) * [x; y; z];
     %Now on spin boson
     H_0 = (e/2) .* z + (del / 2) .* x;
 
