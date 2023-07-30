@@ -1,0 +1,73 @@
+% function result = line_cal(line)
+%input is a string, result is a vertorization of a 2 by 2 matrix
+    
+line = '[a,(0*(GTt0-GTta))]([(b*(-GTba)),p(a*(Gba-G0a))b]-[(b*(-GTba)),pb](a*(Gba-G0a)))'
+
+    %Any hadmard product is replaced by matrix A
+    A = [1,2;3,4];
+    a = [5,6;7,8];
+    b = [9,10;11,12];
+    p = [13,14;15,16];
+
+
+    %setup for commutator
+    line = replace(line, ',', '=');
+    line = replace(line, '[', 'S');
+    line = replace(line, ']', 'E');
+    %% Hardmard Product
+    mask1 = line == '(';
+    while sum(mask1) ~= 0
+        mask1 = target == '(';
+        mask2 = target == 'q';
+        mask3 = target == 'E';
+        mask = mask1 + 2 * mask2 + 3 * mask3;
+        str_mask = num2str(mask);
+        str_mask = str_mask(str_mask ~= ' ');
+        %find all the commas so we can find the ones we need
+        comma_pos = strfind(str_mask, '2');
+        %this pattern gives the commutator without embedded ones within
+        pat = '10+20+3';
+        [startIn, endIn] = regexp(str_mask, pat);
+        com = comma_pos(comma_pos < endIn(1) & comma_pos > startIn(1));
+        %the part before target commutator
+        pre = target(1: startIn(1) -1);
+        %the two parts to plug into commutator
+        part1 = target(startIn(1)+1: com -1);
+        part2 = target(com+1 : endIn(1)-1);
+        %the part after target commutator
+        result = ['(', part1, '*', part2, '-', part2, '*', part1, ')'];
+        post = target(endIn(1) + 1 : end);
+        target = [pre, result, post];
+        mask1 = target == 'S';
+    end
+    %% Commutators
+    target = line;
+    mask1 = target == 'S';
+    while sum(mask1) ~= 0
+        mask1 = target == 'S';
+        mask2 = target == '=';
+        mask3 = target == 'E';
+        mask = mask1 + 2 * mask2 + 3 * mask3;
+        str_mask = num2str(mask);
+        str_mask = str_mask(str_mask ~= ' ');
+        %find all the commas so we can find the ones we need
+        comma_pos = strfind(str_mask, '2');
+        %this pattern gives the commutator without embedded ones within
+        pat = '10+20+3';
+        [startIn, endIn] = regexp(str_mask, pat);
+        com = comma_pos(comma_pos < endIn(1) & comma_pos > startIn(1));
+        %the part before target commutator
+        pre = target(1: startIn(1) -1);
+        %the two parts to plug into commutator
+        part1 = target(startIn(1)+1: com -1);
+        part2 = target(com+1 : endIn(1)-1);
+        %the part after target commutator
+        result = ['(', part1, '*', part2, '-', part2, '*', part1, ')'];
+        post = target(endIn(1) + 1 : end);
+        target = [pre, result, post];
+        mask1 = target == 'S';
+    end
+
+    result = implicit_mutiplication({'a', 'b', 't', 'p', 'A'}, target);
+
+% end
