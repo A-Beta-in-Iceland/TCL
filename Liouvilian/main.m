@@ -1,7 +1,7 @@
 
 file = readcell('Reduced_Nonzero_Terms.xlsx');
 reduced = file;
-file = readcell('Liouvillian.xlsx');
+file = readcell('Checking terms 2.xlsx');
 Liouvillian = file;
 
 A = [1,2;3,4];
@@ -71,5 +71,5 @@ for col = 1:7
     end
 end
 
-writecell(fn, 'check_liou.xlsx');
+writecell(fn, 'check_liou_kellum_2.xlsx');
 fprintf('There are %d errors', error)

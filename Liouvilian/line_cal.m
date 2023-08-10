@@ -29,7 +29,7 @@ function result = line_cal(line)
         pat = '10210+33';
         [startIn, endIn] = regexp(str_m, pat);
         com = had_pos(had_pos < endIn(1) & had_pos > startIn(1));
-        %the part before target commutator
+        %the part before target hadmard product
         pre = line(1: startIn(1) -1);
         %the two parts to plug into commutator
         part1 = line(startIn(1)+1: com -1);

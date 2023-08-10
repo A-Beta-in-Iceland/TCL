@@ -1,8 +1,8 @@
 
-file = readcell('Reduced_Nonzero_Terms.xlsx');
-reduced = file;
+file = readcell('Liouvillian (1).xlsx');
+kellum = file;
 file = readcell('Liouvillian.xlsx');
-Liouvillian = file;
+pei = file;
 
 A = [1,2;3,4];
 a = [5,6;7,8];
@@ -10,21 +10,19 @@ b = [9,10;11,12];
 p = [13,14;15,16];
 
 
-fn = Liouvillian;
+error = 0
+
+fn = kellum;
 for col = [3, 5, 7]
     for row = 2 : 44
         place = [col, row];
         display(place);
-        redu = reduced{row, col};
-        liou = Liouvillian{row, col};
-        if ~strcmp(class(redu), 'missing')
-            redu = line_cal(redu);
-            redu = eval(redu);
-            redu = reshape(redu, [4,1]);
-            
-            liou = line_cal_Liou(liou);
-            if ~all(redu == liou)
-                fn{row, col} = 'false';
+        k = kellum{row, col};
+        p = pei{row, col};
+        if ~strcmp(class(k), 'missing')
+            if ~strcmp(p, k)
+                    fn{row, col} = 'Doesn'' Match';
+                    error = error + 1;
             end
         %     try 
         %         [out0, out1, out2, out3] = line_calculation(line);
@@ -63,4 +61,5 @@ for col = 1:7
     end
 end
 
-writecell(fn, 'check_liou.xlsx');
+writecell(fn, 'check_matches.xlsx');
+fprintf('There are %d errors', error)
