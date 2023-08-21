@@ -5,18 +5,30 @@ import pandas as pd
 
 """
 Convert a single system term to a reduced version using the Hadamard trick.
+To obtain the output seen in the "Reduced Nonzero Terms" sheet, leave these as
+their default values.
 
 integrals: a string of the form (abc)(def)(ghi)(jkl)(mno)
 corrterms: a string of the form <ab><cd><ef>
 systemterm: a string of the form a[b,[c,d]] or something like that
+hadamard_prod_printer: a function that takes two string arguments and
+        outputs a string. Determines how the hadamard product will be printed.
+        By default, the hadamard product between x and y is printed x*y.
+conform_zero_operator: determines whether the A(t) operator will be printed
+        as "0" or as "t." Default is "0," pass True if you want "t".
 
 returns: a tuple (integrals, systemterm)
         where integrals should be (abc)(def) and systemterms are reduced
 """
-def perform_hadamard_reduction(integrals, corrterms, systemterm):
+def perform_hadamard_reduction(integrals, corrterms, systemterm,
+                hadamard_prod_printer=None, conform_zero_operator=False):
 
     gamma_symbol = "G"
     gamma_transpose_symbol = "GT"
+
+    # default hadamard printer is x*y
+    hadamard_prod = (hadamard_prod_printer if hadamard_prod_printer is not None else
+                    lambda x,y: f"({x}*({y}))")
 
     # iteratively reduces systemterms one integral at a time
     # when len(integrals) = 10, there are only two integrals left and we are done
@@ -39,25 +51,22 @@ def perform_hadamard_reduction(integrals, corrterms, systemterm):
 
         # replaces the correlation factor 0 with t when within a gamma
         conform_for_time = lambda x: "t" if x == "0" else x
+        if conform_zero_operator:
+            dt_comp = conform_for_time(dt_comp)
 
         # replaces the relevant system operator (dt) with the hadamard product
         # following the rules outlined in the "Hadamard_Equation_Proof.pdf" file
-        # * indicates hadamard product
         if not transpose:
             systemterm = systemterm.replace(dt,
-            (f"({dt_comp}*({current_gs}{upper_bound}{conform_for_time(dt_comp)}"
-            f"-{current_gs}{lower_bound}{conform_for_time(dt_comp)}))"))
+            hadamard_prod(dt_comp,(f"{current_gs}{upper_bound}{conform_for_time(dt_comp)}"
+            f"-{current_gs}{lower_bound}{conform_for_time(dt_comp)}")))
         else:
             systemterm = systemterm.replace(dt,
-            (f"({dt_comp}*({current_gs}{conform_for_time(dt_comp)}{lower_bound}"
-            f"-{current_gs}{conform_for_time(dt_comp)}{upper_bound}))"))
+            hadamard_prod(dt_comp,(f"{current_gs}{conform_for_time(dt_comp)}{lower_bound}"
+            f"-{current_gs}{conform_for_time(dt_comp)}{upper_bound}")))
 
         # Removes the innermost integral, which is now encapsualted in the gamma function
         integrals = integrals[:-5]
-
-        # print(dt, " ", dt_comp, " ", transpose, " ", current_gs)
-        # print(systemterm)
-        # print(integrals)
 
         # Repeat three times
 
@@ -113,60 +122,63 @@ def replace_dummy_variables(integrals, systemterm):
 
     return (integrals, systemterm)
 
-# Example:
+if __name__ == '__main__':
 
-# integral_ex = "(0t1)(014)(413)(012)(045)"
-# corrterms_ex = "<02><51><34>"
-# systemterm_ex = "-[1,2]4p[3,5]"
-#
-# new_integral_ex, reduced_term_ex = perform_hadamard_reduction(integral_ex, corrterms_ex, systemterm_ex)
-#
-# print("reduced int = ", new_integral_ex)
-# print("reduced term = ", reduced_term_ex)
-#
-# new_integral_ex, reduced_term_ex = replace_dummy_variables(new_integral_ex, reduced_term_ex)
-#
-# print("reduced int = ", new_integral_ex)
-# print("reduced term = ", reduced_term_ex)
+    # # Example:
+    #
+    # integral_ex = "(0t1)(014)(413)(012)(045)"
+    # corrterms_ex = "<02><51><34>"
+    # systemterm_ex = "-[1,2]4p[3,5]"
+    #
+    # new_integral_ex, reduced_term_ex = perform_hadamard_reduction(integral_ex, corrterms_ex, systemterm_ex,
+    #         hadamard_prod_printer = lambda x,y: f"H({x},{y})", conform_zero_operator=True)
+    #
+    # print("reduced int = ", new_integral_ex)
+    # print("reduced term = ", reduced_term_ex)
+    #
+    # new_integral_ex, reduced_term_ex = replace_dummy_variables(new_integral_ex, reduced_term_ex)
+    #
+    # print("reduced int = ", new_integral_ex)
+    # print("reduced term = ", reduced_term_ex)
 
 
-# File processing:
+    # File processing:
 
-fname = pjoin(dirname(__file__), "TCL_Integrals.xlsx")
+    fname = pjoin(dirname(__file__), "TCL_Integrals.xlsx")
 
-corrterms = pd.read_excel(fname, sheet_name="Nonzero Terms", usecols="A", nrows=70, header=None, skiprows=1)
-corrterms = corrterms.to_numpy().flatten()
+    corrterms = pd.read_excel(fname, sheet_name="Nonzero Terms", usecols="A", nrows=70, header=None, skiprows=1)
+    corrterms = corrterms.to_numpy().flatten()
 
-integrals = pd.read_excel(fname, sheet_name="Nonzero Terms", usecols="B,C,D", nrows=70, header=None, skiprows=1)
-integrals = integrals.to_numpy()
+    integrals = pd.read_excel(fname, sheet_name="Nonzero Terms", usecols="B,C,D", nrows=70, header=None, skiprows=1)
+    integrals = integrals.to_numpy()
 
-systemterms = pd.read_excel(fname, sheet_name="Nonzero Terms", usecols="E", nrows=70, header=None, skiprows=1)
-systemterms = systemterms.to_numpy().flatten()
+    systemterms = pd.read_excel(fname, sheet_name="Nonzero Terms", usecols="E", nrows=70, header=None, skiprows=1)
+    systemterms = systemterms.to_numpy().flatten()
 
-reducedsystemterms = np.full(integrals.shape, '', dtype=object)
+    reducedsystemterms = np.full(integrals.shape, '', dtype=object)
 
-# go through all correlation terms
-for i, corrterm in enumerate(corrterms):
-    # check if row is blank
-    if not isinstance(corrterm, float):
-        # go through all integrals in that row
-        for j, integral in enumerate(integrals[i]):
-            # check if integral is blank
-            if not isinstance(integral, float):
-                # integral[1:] to exclude sign
-                # perform reduction on integral/system term with corresponding corr term
-                new_integral, reduced_term = replace_dummy_variables(
-                    *perform_hadamard_reduction(integral[1:], corrterm, systemterms[i]))
-                integrals[i,j] = integral[0] + new_integral
-                reducedsystemterms[i,j] = reduced_term
+    # go through all correlation terms
+    for i, corrterm in enumerate(corrterms):
+        # check if row is blank
+        if not isinstance(corrterm, float):
+            # go through all integrals in that row
+            for j, integral in enumerate(integrals[i]):
+                # check if integral is blank
+                if not isinstance(integral, float):
+                    # integral[1:] to exclude sign
+                    # perform reduction on integral/system term with corresponding corr term
+                    new_integral, reduced_term = replace_dummy_variables(
+                        *perform_hadamard_reduction(integral[1:], corrterm, systemterms[i]))
+                    integrals[i,j] = integral[0] + new_integral
+                    reducedsystemterms[i,j] = reduced_term
 
-# export remaining integrals and system terms to a spreadsheet
+    # export remaining integrals and system terms to a spreadsheet
 
-integrals_df = pd.DataFrame(integrals)
-systemterms_df = pd.DataFrame(reducedsystemterms)
-
-with pd.ExcelWriter("TCL_Integrals.xlsx", engine="openpyxl", mode="a", if_sheet_exists="overlay") as writer: # pylint: disable=abstract-class-instantiated
-    integrals_df.to_excel(writer,  index=False, header=False, na_rep="=\"\"", sheet_name='Reduced Nonzero Terms',
-        startcol=1, startrow=1)
-    systemterms_df.to_excel(writer,  index=False, header=False, na_rep="=\"\"", sheet_name='Reduced Nonzero Terms',
-        startcol=4, startrow=1)
+    # integrals_df = pd.DataFrame(integrals)
+    # systemterms_df = pd.DataFrame(reducedsystemterms)
+    #
+    # with pd.ExcelWriter("TCL_Integrals.xlsx", engine="openpyxl", mode="a", if_sheet_exists="overlay") as writer: # pylint: disable=abstract-class-instantiated
+    #     integrals_df.to_excel(writer,  index=False, header=False, na_rep="=\"\"", sheet_name='Reduced Nonzero Terms',
+    #         startcol=1, startrow=1)
+    #     systemterms_df.to_excel(writer,  index=False, header=False, na_rep="=\"\"", sheet_name='Reduced Nonzero Terms',
+    #         startcol=4, startrow=1)
