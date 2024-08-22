@@ -1,4 +1,4 @@
-# Primarily used to check whether two factorizations of system terms are
+# Primarily used to check whether two factorizations of system terms are equal
 
 import sympy as sp
 import numpy as np
